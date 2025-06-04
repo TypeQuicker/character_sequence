@@ -13,15 +13,17 @@ def clean_text(text):
     text = re.sub(r'\s+', ' ', text)
     return text.strip()
 
+def clean_word(word):
+    """Return a lowercase word stripped of non-alpha characters."""
+    return re.sub(r'[^a-z]', '', word.lower())
+
+def extract_clean_words(text):
+    """Split and clean words from raw text input."""
+    return [clean_word(word) for word in text.split() if clean_word(word)]
+
 def get_words_from_text(text):
     """Get all valid words from text."""
-    words = text.split()
-    good_words = []
-    for word in words:
-        clean_word = re.sub(r'[^a-z]', '', word.lower())
-        if clean_word:
-            good_words.append(clean_word)
-    word_counts = Counter(good_words)
+    word_counts = Counter(extract_clean_words(text))
     return word_counts
 
 def get_ngrams_from_text(text, n):
@@ -34,12 +36,31 @@ def get_ngrams_from_text(text, n):
         for i in range(len(word) - n + 1):
             ngram = word[i:i+n]
             if ngram not in results:
-                results[ngram] = {
-                    'count': 0,
-                    'words': {}
-                }
+                results[ngram] = {'count': 0, 'words': {}}
             results[ngram]['count'] += word_freq
             results[ngram]['words'][word] = word_freq
+    return results
+
+def get_ngram_transitions_from_text(text, n):
+    """Get n-gram transitions and their source word pairs."""
+    clean_words = extract_clean_words(text)
+    results = {}
+
+    for i in range(len(clean_words) - 1):
+        word1 = clean_words[i]
+        word2 = clean_words[i + 1]
+
+        if len(word1) >= n and len(word2) >= n:
+            first_ngram = word1[-n:]
+            second_ngram = word2[:n]
+            transition = f"{first_ngram} {second_ngram}"
+            pair = f"{word1} {word2}"
+
+            if transition not in results:
+                results[transition] = {'count': 0, 'words': {}}
+            results[transition]['count'] += 1
+            results[transition]['words'][pair] = results[transition]['words'].get(pair, 0) + 1
+
     return results
 
 def count_items(items):
@@ -60,18 +81,45 @@ def sort_by_count(item):
         count = data
     return -count 
 
-def save_results(ngram_data, output_file):
+def get_top_unique_words(sorted_words, limit=3):
+    """Return up to `limit #` of unique words for the csv output."""
+    sample_words = []
+    for word, _ in sorted_words:
+        if word not in sample_words:
+            sample_words.append(word)
+        if len(sample_words) == limit:
+            break
+    return sample_words
+
+def save_ngram_results(ngram_data, output_file):
     """Save results to a CSV file."""
     with open(output_file, 'w') as f:
         f.write("sequence,count,common_words\n")
-        # Sort n-grams by count (highest first)
+        # Sort n-grams by occurence
         sorted_ngrams = sorted(ngram_data.items(), key=sort_by_count)
         for ngram, data in sorted_ngrams:
             count = data['count']
             sorted_words = sorted(data['words'].items(), key=sort_by_count)
             sample_words = []
-            for word, _ in sorted_words[:3]: # Only look at first 3 words
-                if word not in sample_words: # Avoid duplicating sample_words. E.g. Incorrect 4-gram: that,771,that, that, that Correct 4-gram: that,771,that
-                    sample_words.append(word)
+            
+            sample_words = get_top_unique_words(sorted_words, limit=3)
+            
             common_words = ", ".join(sample_words)
             f.write(f"{ngram},{count},{common_words}\n")
+
+def save_transition_results(transition_data, output_file):
+    """Save transition results to a CSV file."""
+    with open(output_file, 'w') as f:
+        f.write("transition,count,common_words\n")
+        # Sort transitions by occurence
+        sorted_transitions = sorted(transition_data.items(), key=sort_by_count)
+        
+        for transition, data in sorted_transitions:
+            count = data['count']
+            sorted_words = sorted(data['words'].items(), key=sort_by_count)
+            sample_words = []
+            
+            sample_words = get_top_unique_words(sorted_words, limit=3)
+
+            common_words = ", ".join(sample_words)
+            f.write(f"{transition},{count},{common_words}\n")
