@@ -8,16 +8,20 @@ from datasets import load_dataset
 from utils import clean_text, get_words_from_text, save_ngram_results, get_ngrams_from_text
 import os
 
-def analyze_book():
+def analyze_ngrams():
     """Analyze n-grams in a Project Gutenberg book."""
     # Create output folder if it doesn't exist
     os.makedirs('data/ngrams', exist_ok=True)
     
+    # First row of the dataset only
     dataset = load_dataset("manu/project_gutenberg", split="en", streaming=True)
     book = next(iter(dataset))
-    
-    # Clean the text
     clean_book_text = clean_text(book['text'])
+
+    # All rows of the dataset
+    # dataset = load_dataset("manu/project_gutenberg", split="en")
+    # text = " ".join(book['text'] for book in dataset)
+    # clean_book_text = clean_text(text)
     
     # Analyze different lengths of character patterns
     for n in [2, 3, 4]:
@@ -32,4 +36,4 @@ def analyze_book():
         print(f"Results saved to {output_file}")
 
 if __name__ == "__main__":
-    analyze_book()
+    analyze_ngrams()
