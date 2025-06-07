@@ -20,23 +20,22 @@ The analysis generates several CSV files:
 
 ### N-grams
 
-ngram_analyzer.py is the main script to analyze n-grams in Project Gutenberg books.
-This script reads a book, finds character patterns (n-grams),
-and saves the results to CSV files.
-- `bigrams.csv`: Two-character sequences
-- `trigrams.csv`: Three-character sequences
-- `quadgrams.csv`: Four-character sequences
+ngram_analyzer.py is the main script to analyze n-grams.
+- `data/ngrams/bigrams.csv`: Two-character sequences
+- `data/ngrams/trigrams.csv`: Three-character sequences
+- `data/ngramsquadgrams.csv`: Four-character sequences
 
 ### Transitions
 
 transitions_analyser is the main script to analyze "n" character sequence transitions between consecutive words.
-- `bigram_transitions.csv`: Two-character transition patterns
-- `trigram_transitions.csv`: Three-character transition patterns
-- `quadgram_transitions.csv`: Four-character transition patterns
+- `data/transitions/bigram_transitions.csv`: Two-character transition patterns
+- `data/transitions/trigram_transitions.csv`: Three-character transition patterns
+- `data/transitions/quadgram_transitions.csv`: Four-character transition patterns
 
 ### Words
-Work in progress
-- `words.csv`: Individual word occurances.
+
+word_analyser is the main script to analyze word counts.
+- `data/words/words.csv`: Individual word occurances.
 
 ## License
 
