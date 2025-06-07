@@ -97,10 +97,6 @@ def get_top_unique_words(sorted_words, limit=3):
             break
     return sample_words
 
-def sort_word_by_count(item):
-    """Sort (word, count) by count descending."""
-    return -item[1]
-
 def save_ngram_results(ngram_data, output_file):
     """Save results to a CSV file."""
     with open(output_file, 'w') as f:
@@ -138,7 +134,6 @@ def save_word_results(word_counts, output_file):
     """Save word counts to a CSV file."""
     with open(output_file, 'w') as f:
         f.write("word,count\n")
-        # Sort using the helper function
-        sorted_words = sorted(word_counts.items(), key=sort_word_by_count)
+        sorted_words = sorted(word_counts.items(), key=sort_by_count)
         for word, count in sorted_words:
             f.write(f"{word},{count}\n")
