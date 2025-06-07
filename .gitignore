@@ -2,4 +2,4 @@ venv/
 .venv
 data/*
 !data/.gitkeep
-s
+scripts/archive/
