@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """
 Main script to analyze n-grams in Project Gutenberg books.
 This script reads a book, finds character patterns (n-grams),
@@ -7,7 +5,7 @@ and saves the results to CSV files.
 """
 
 from datasets import load_dataset
-from utils import clean_text, get_ngrams_from_text, save_results
+from utils import clean_text, get_words_from_text, save_ngram_results, get_ngrams_from_text
 import os
 
 def analyze_book():
@@ -30,7 +28,7 @@ def analyze_book():
         
         # Save what we found
         output_file = f"data/ngrams/{n}grams.csv"
-        save_results(ngram_data, output_file)
+        save_ngram_results(ngram_data, output_file)
         print(f"Results saved to {output_file}")
 
 if __name__ == "__main__":

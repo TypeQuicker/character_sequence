@@ -9,17 +9,19 @@ def clean_text(text):
     text = re.sub(r'www\.\S+', ' ', text)
     text = re.sub(r'/\S+', ' ', text)
     text = re.sub(r'&[a-z]+;', ' ', text)
-    text = re.sub(r'[^a-z\s]', ' ', text)
+    text = re.sub(r"[^a-z'\s]", ' ', text)
+    text = re.sub(r"[^\w\s']+", ' ', text)
     text = re.sub(r'\s+', ' ', text)
+    text = re.sub(r'™|&trade;', ' ', text)
     return text.strip()
-
-def clean_word(word):
-    """Return a lowercase word stripped of non-alpha characters."""
-    return re.sub(r'[^a-z]', '', word.lower())
 
 def extract_clean_words(text):
     """Split and clean words from raw text input."""
-    return [clean_word(word) for word in text.split() if clean_word(word)]
+    cleaned = []
+    for word in text.split():
+        if len(word) > 1 or word in {"a", "i"}:
+            cleaned.append(word)
+    return cleaned
 
 def get_words_from_text(text):
     """Get all valid words from text."""
@@ -31,10 +33,11 @@ def get_ngrams_from_text(text, n):
     word_counts = get_words_from_text(text)
     results = {}
     for word, word_freq in word_counts.items():
-        if len(word) < n:
+        stripped_word = word.replace("'", "")
+        if len(stripped_word) < n:
             continue
-        for i in range(len(word) - n + 1):
-            ngram = word[i:i+n]
+        for i in range(len(stripped_word) - n + 1):
+            ngram = stripped_word[i:i+n]
             if ngram not in results:
                 results[ngram] = {'count': 0, 'words': {}}
             results[ngram]['count'] += word_freq
@@ -47,12 +50,15 @@ def get_ngram_transitions_from_text(text, n):
     results = {}
 
     for i in range(len(clean_words) - 1):
-        word1 = clean_words[i]
-        word2 = clean_words[i + 1]
+        word1 = clean_words[i]  
+        word2 = clean_words[i + 1] 
 
-        if len(word1) >= n and len(word2) >= n:
-            first_ngram = word1[-n:]
-            second_ngram = word2[:n]
+        word1_stripped = word1.replace("'", "")
+        word2_stripped = word2.replace("'", "")
+
+        if len(word1_stripped) >= n and len(word2_stripped) >= n:
+            first_ngram = word1_stripped[-n:]
+            second_ngram = word2_stripped[:n]
             transition = f"{first_ngram} {second_ngram}"
             pair = f"{word1} {word2}"
 
@@ -91,6 +97,10 @@ def get_top_unique_words(sorted_words, limit=3):
             break
     return sample_words
 
+def sort_word_by_count(item):
+    """Sort (word, count) by count descending."""
+    return -item[1]
+
 def save_ngram_results(ngram_data, output_file):
     """Save results to a CSV file."""
     with open(output_file, 'w') as f:
@@ -123,3 +133,12 @@ def save_transition_results(transition_data, output_file):
 
             common_words = ", ".join(sample_words)
             f.write(f"{transition},{count},{common_words}\n")
+
+def save_word_results(word_counts, output_file):
+    """Save word counts to a CSV file."""
+    with open(output_file, 'w') as f:
+        f.write("word,count\n")
+        # Sort using the helper function
+        sorted_words = sorted(word_counts.items(), key=sort_word_by_count)
+        for word, count in sorted_words:
+            f.write(f"{word},{count}\n")

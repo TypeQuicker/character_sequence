@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 from datasets import load_dataset
 import sys
 
@@ -9,8 +7,9 @@ def test_dataset_connection():
         ds = load_dataset("manu/project_gutenberg", split="en", streaming=True) 
         first_row = next(iter(ds))
         content = first_row.get('text', '')[:5000] # First 5000 characted of the text
-        #print(content)
-        print(first_row)
+        print(content)
+        # Below method prints the entire first row
+#       print(first_row)
         return True
         
     except Exception as e:
