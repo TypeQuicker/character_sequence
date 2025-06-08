@@ -12,12 +12,16 @@ def analyze_transitions():
     """Analyze n-gram transitions in a Project Gutenberg book."""
     # Create output folder if it doesn't exist
     os.makedirs('data/transitions', exist_ok=True)
-    
+
+    # First row of the dataset only
     dataset = load_dataset("manu/project_gutenberg", split="en", streaming=True)
     book = next(iter(dataset))
-    
-    # Clean the text
     clean_book_text = clean_text(book['text'])
+
+    # All rows of the dataset
+    # dataset = load_dataset("manu/project_gutenberg", split="en")
+    # text = " ".join(book['text'] for book in dataset)
+    # clean_book_text = clean_text(text)
     
     # Analyze different lengths of character pattern transitions
     for n in [2, 3, 4]:
